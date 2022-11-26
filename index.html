@@ -1,178 +1,308 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    
-    <link rel="stylesheet" href="bootstrap.min.css">
-    <title>CodiceFiscaleJS</title>
-    <script src="jquery-3.3.1.min.js"></script>
-    <script src="bootstrap.bundle.min.js"></script>
-    <script src="codice.fiscale.var.js"></script>
-    <!-- Place this tag in your head or just before your close body tag. -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
-    <style>
-        body{
-            background-color: #f7f7f9;
-        }
-    </style>
-</head>
-<body>
-   
-    <div class="jumbotron jumbotron-fluid">
-        <div class="container"> 
-            <h1>Codice Fiscale by Pavel Filingeri</h1>
-            <form id="cf-direct">
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="name">Nome</label>
-                        <input type="text" class="form-control" id="name" placeholder="Nome" name="name"  required>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="surname">Cognome</label>
-                        <input type="text" class="form-control" id="surname" placeholder="Cognome" name="surname" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="gender">Sesso</label>
-                        <select class="custom-select" name="gender" id="gender" required>
-                            <option selected value="M">Maschio</option>
-                            <option value="F">Femmina</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="birthday">Nato il</label>
-                        <input type="date" class="form-control" id="birthday" name="birthday"  required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="birthday_province">Provincia di nascita</label>
-                        <select class="custom-select" name="birthplace_province" id="birthplace_province" required>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="birthplace">Comune di nascita</label>
-                        <select class="custom-select" name="birthplace" id="birthplace" required>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Calcola</button>
-                <button type="reset" class="btn btn-danger">Reset</button>
-            </form>
-            <hr>
-            <div class="form-row">
-                <div class="form-group col-md-12">
-                    <label for="cf">Codice Fiscale</label>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" id="cf-1" readonly>
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-primary" type="button" id="copy">Copia</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="alert alert-success alert-dismissible fade" id="alert">
-                Codice fiscale copiato negli appunti!!!
-                <button type="button" class="close" id="copy-alert-btn" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <hr>
-        </div>
-    </div>
 
-    
+    <meta charset="UTF-8">
+    <title>Verifica 4C Pavel Filingeri</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <script src="https://kit.fontawesome.com/e2ac9cc532.js" crossorigin="anonymous"></script><link rel="stylesheet" href="./style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous"> 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery.qrcode.js"></script>
+		<script type="text/javascript" src="js/qrcode.js"></script>
+
 
     <script>
-        $(function(){
-            /*
-             * COMPUTE CODICE FISCALE
-             */
-
-            CodiceFiscale.utils.birthplaceFields("#birthplace_province", "#birthplace");
-            $("#birthplace_province").val("EE").change();
-            setTimeout(()=>$("#birthplace").val("Z404"), 1000);
-            $('form#cf-direct').submit(function(ev){
-                    ev.preventDefault();
-                    let cf = new CodiceFiscale({
-                        name : $("#name").val(),
-                        surname : $("#surname").val(),
-                        gender : $("#gender").val(),
-                        birthday : $("#birthday").val(),
-                        birthplace : $("#birthplace").val()
-                    });
-
-                    $("#cf-1").val(cf.toString());
-                
-            });
-
-            $("#copy").click(function(){
-                copyToClipboard($("#cf-1").val());
-                $('#alert').alert().addClass("show");
-                setTimeout(()=>$('#alert').removeClass("show"), 3000);
-            });
-
-            $("#copy-alert-btn").click(function(){
-                $('#alert').removeClass("show");
-            })
-
-            /*
-             *  REVERSE CODICE FISCALE
-             */
-
-             $("#cf-reverse").submit(function(e){
-                 e.preventDefault();
-                 
-                let cf = $("#cf-reverse #cf-2").val();
-                if(CodiceFiscale.check(cf)){
-                    $("#cf-reverse #cf-2").removeClass('is-invalid');
-                    let cfData = CodiceFiscale.computeInverse(cf);
-                    console.log(cfData);
-                    $("#name-reverse").val(cfData.name);
-                    $("#surname-reverse").val(cfData.surname);
-                    $("#gender-reverse").val(cfData.gender);
-                    $("#birthplace-reverse").val(cfData.birthplace);
-                    $("#birthplace_province-reverse").val(cfData.birthplaceProvincia);
-                    $("#birthday-reverse").val(cfData.birthday);
-                } else {
-                    $("#cf-reverse #cf-2").addClass('is-invalid');
-                    $("#cf-reverse").reset();
-                }
-                 
-             });
-
-
-            /*
-             *  Validate CODICE FISCALE
-             */
-
-             $("#cf-validate").submit(function(e){
-                e.preventDefault();
-               $("#cf-validate #cf-3").removeClass('is-valid is-invalid');
-               let cf = $("#cf-validate #cf-3").val();
-               if(CodiceFiscale.check(cf)){
-                   $("#cf-validate #cf-3").addClass('is-valid');
-               } else {
-                   $("#cf-validate #cf-3").addClass('is-invalid');
-               }
-                
-            });
-
-
+      $(document).ready(function(){
+        $('.click').click(function(){
+          $('.popup_box').css("display", "block");
         });
+        $('.btn1').click(function(){
+          $('.popup_box').css("display", "none");
+        });
+        $('.btn2').click(function(){
+          $('.popup_box').css("display", "none");
+          alert("Forza Juve!");
+        });
+      });
 
-        function copyToClipboard (str) {
-            const el = document.createElement('textarea');
-            el.value = str;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-          };
-        
     </script>
 
+
+
+</head>
+
+<body>
+
+
+
+
+<!-- Primo form -->
+<div id="forma" class="animazione">
+
+  <form action="" method="post" onSubmit="return false;">
+  
+          <div class='signup-container'>
+                <div class='left-container'>
+    
+                    <div class='puppy'>
+                      <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Juventus_FC_2017_logo.svg/1031px-Juventus_FC_2017_logo.svg.png'>
+              </div>
+             </div>
     
     
+    
+    
+    <div class='right-container'>
+        <header>
+        <h1>Ogni giorno nuovi vantaggi!</h1><p class='bordi'> Effettua la registrazione!  </p> 
+        <div class='set'>
+              <div class='pets-name'>
+                  <label for='pets-name'>Nome</label>
+                  <input id='pets-name' placeholder="Nome" type='text' onchange="controllo(),controllofinale()">
+              </div>
+            <div class='pets-photo'>
+  
+              <button id="ciao" type="submit" onclick="window.location.href='https://www.instagram.com/juventus/';" value="Instagram">
+                <i class="fas fa-camera-retro"></i>
+              </button>
+  
+              <button id="ciao" type="submit" onclick="window.location.href='https://www.google.com/search?client=firefox-b-d&q=numero+telefono+juventus';" value="Numero di Telefono">
+                <i class="fas fa-phone-alt"></i>
+              </button>
+  
+  
+            </div>
+        </div>
+
+
+
+        <div class='set'>
+          <div class='pets-breed'>
+            <label for='pets-breed'>Cognome</label>
+            <input id='pets-breed' placeholder="Cognome" type='text' onchange="controllo(),controllofinale()">
+          </div>
+          <div class='pets-birthday'>
+            <label for='pets-birthday'>Data di nascita</label>
+            <input id='pets-birthday'  type='date' onchange="controllo(),controllofinale()">
+          </div>
+        </div>
+        <div class='set'>
+          <div class='pets-gender'>
+            <label for='pet-gender-female'>Sesso</label>
+            <div class='radio-container'>
+              <input checked='' id='pet-gender-female' name='pet-gender' type='radio' value='female'>
+              <label for='pet-gender-female'>Maschio</label>
+              <input id='pet-gender-male' name='pet-gender' type='radio' value='male'>
+              <label for='pet-gender-male'>Femmina</label>
+            </div>
+          </div>
+          <div class='pets-spayed-neutered'>
+            <label for='pet-spayed'>Abbonamento</label>
+            <div class='radio-container'>
+              <input checked='' id='pet-spayed' name='spayed-neutered' type='radio' value='spayed'>
+              <label for='pet-spayed'>Base</label>
+              <input id='pet-neutered' name='spayed-neutered' type='radio' value='neutered'>
+              <label for='pet-neutered'>Premium</label>
+  
+        
+        
+            </div>
+          </div>
+        </div>
+      </header>
+      <footer>
+
+        <div class='set'>
+          <a style="text-decoration: none;" class="click">Avviso</a>
+
+
+          <button id="next" onclick="funzione()" >Next</button>
+          
+
+          <div class="popup_box">
+            <i class="fas fa-exclamation"></i>
+            <h1>Form creato da Pavel Filingeri!</h1>
+            <div class="btns">
+              <a href="#" class="btn1">Procedere</a>
+              <a href="#" class="btn2">Avviso!</a>
+            </div>
+          </div>
+
+
+        </div>
+      </footer>
+    </div>
+      </div>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <!-- chiusura div principale-->
+  </form>
+    </div>
+  
+  
+ 
+  
+  
+    <!-- Secondo form -->
+    <div id="formino" class="animazione2">
+      <form action="" method="post" onSubmit="return false;">
+
+
+      
+  
+  
+  
+  
+    <div class='signup-container'>
+    <div class='left-container'>
+    
+    
+    
+    
+      <div class='puppy'>
+        <img    src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Juventus_FC_2017_logo.svg/1031px-Juventus_FC_2017_logo.svg.png'>
+      </div>
+    </div>
+    
+    
+    
+    
+    <div class='right-container'>
+      <header>
+        <h1 style="font-family: 'Raleway',sans-serif;  letter-spacing: -2px;">Campo 2 Registrazione</h1>
+        <div class='set'>
+          <div class='pets-name'>
+            <label for='pets-name'>Numero di Telefono</label>
+            <input id='numero' placeholder="Numero di Telefono" type='text' onchange="controllontelefono(),controllofinale()">
+          </div>
+          <div class='pets-photo'>
+  
+            <input type="readonly" readonly id="lettura">
+              
+            </button>
+  
+          
+          </div>
+        </div>
+        <div class='set'>
+          <div class='pets-breed'>
+            <label for='pets-breed'>Email</label>
+            <input id='email' placeholder="Email" type='email' onchange="controlloemail(),controllofinale()">
+          </div>
+          <div class='pets-birthday'>
+            <label for='pets-birthday'>Password</label>
+            <input id='password'  type='password' onchange="controllofinale()">
+          </div>
+        </div>
+  
+        <div class='set'>
+          <div class='pets-gender'>
+            
+            <label for="price" style="display: inline;">Partite media all'anno: </label><span id="demo"></span>
+        
+            <input  type="range" name="price"  id="price" min="1" max="38" step="1" value="5" />
+            
+            
+                <script>
+            var slider = document.getElementById("price");
+            var output = document.getElementById("demo");
+            output.innerHTML = slider.value;
+      
+            slider.oninput = function() {
+            output.innerHTML = this.value;
+            }
+  
+            </script>
+  
+    <label> Risultato
+  
+    </label>
+    <input type="text" onchange="ctrobot()" id="risultato">
+          </div>
+          <div class='pets-spayed-neutered'>
+            <label for='pet-spayed'>Non sono un robot</label>
+            <input type="readonly" readonly id="rbt">
+          </div>
+        </div>
+      </header>
+  
+      <footer>
+        <div class='set'>
+          <button id='backi' onclick="indietro()"><b>Back</b></button>
+          
+          <button id='nexti' onclick="finale()" ><b>Welcome!</b></button>
+  
+          
+        
+          
+        </div>
+      </footer>
+    </div>
+    </div>
+  
+  
+  
+  
+
+  
+  
+  
+  
+  
+    </div>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+      
+  
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+  </form>
+
+
+<center>
+
+  <div id="code" class="qrcodee">
+    <h1 class="finale"> Grazie per esserti registrato!</h1>
+    <h4 class="finale">Forza Juve!</h4>  
+    <button onclick="genera_qrcode()" class="restart">Ricomincia</button><br><br>
+    <div id="code2" ></div>
+    </div>
+
+</center>
+
+
+
+
+
+  <script src="script.js"></script>
 </body>
+
+
 </html>
