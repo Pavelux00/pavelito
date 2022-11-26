@@ -134,6 +134,7 @@ function funzione(){
         }
         else {
            alert("L'indirizzo email che hai inserito non e' valido");
+           document.getElementById("email").value="";
         }
         return false;
             
